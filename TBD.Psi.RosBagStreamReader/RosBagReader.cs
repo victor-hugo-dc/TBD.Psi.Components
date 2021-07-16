@@ -46,7 +46,7 @@ namespace TBD.Psi.RosBagStreamReader
                 var nextRecordOffset = ReadSingleRosBagHeader(bagIndex, 13);
                 // dictionary to help facilitate faster lookup
                 var topicMapping = new Dictionary<int, string>();
-                // read until we reach end of file stream
+                // read until we reach end of file stream.
                 while (nextRecordOffset < fileStream.Length)
                 {
                     // read next record
@@ -134,15 +134,24 @@ namespace TBD.Psi.RosBagStreamReader
                 {
                     // found a deserializer for this type.
                     info.Value.deserializer = this.deserializers[info.Value.Type];
-                    // generate all the information needed by the Psi Store
-                    info.Value.sourceId = streamIds;
-                    var psiStreamMetaData = new RosStreamMetaData(info.Key, streamIds, info.Value.deserializer.AssemblyName,
-                        this.FirstBagName, this.BagDirectory, info.Value.StartTime, info.Value.EndTime, 0, info.Value.MessageCount, 0
-                    );
-                    psiStreamMetaData.deserializeTypeName = info.Value.deserializer.AssemblyName;
-                    streamMetaList.Add(psiStreamMetaData);
-                    streamIds++;
                 }
+                else
+                {
+                    // add generic deserializer
+                    info.Value.deserializer = new GenericMsgDeserializer(info.Value, true);
+
+                }
+
+                // create all the values for the stream
+                info.Value.sourceId = streamIds;
+                var psiStreamMetaData = new RosStreamMetaData(info.Key, streamIds, info.Value.deserializer.AssemblyName,
+                    this.FirstBagName, this.BagDirectory, info.Value.StartTime, info.Value.EndTime, 0, info.Value.MessageCount, 0
+                )
+                {
+                    deserializeTypeName = info.Value.deserializer.AssemblyName
+                };
+                streamMetaList.Add(psiStreamMetaData);
+                streamIds++;
             }
         }
 
@@ -155,6 +164,7 @@ namespace TBD.Psi.RosBagStreamReader
         {
             this.loadDeserializer(new StdMsgsStringDeserializer());
             this.loadDeserializer(new StdMsgsBoolDeserializer());
+            this.loadDeserializer(new StdMsgsColorRGBADeserializer());
             this.loadDeserializer(new SensorMsgsImageDeserializer(true));
             this.loadDeserializer(new SensorMsgsCompressedImageDeserializer(true));      
             this.loadDeserializer(new SensorMsgsJointStateDeserializer(true));      
@@ -163,6 +173,7 @@ namespace TBD.Psi.RosBagStreamReader
             this.loadDeserializer(new TBDAudioMsgsVADStampedDeserializer(true));
             this.loadDeserializer(new TBDAudioMsgsUtterancedDeserializer(true));
             this.loadDeserializer(new GeometrymsgsPoseStampedDeserializer(false));
+            this.loadDeserializer(new GeometrymsgsPointDeserializer());
             this.loadDeserializer(new GeometrymsgsPoseDeserializer());
             this.loadDeserializer(new GeometrymsgsQuaternionDeserializer());
             this.loadDeserializer(new GeometrymsgsTransformDeserializer());

@@ -56,7 +56,7 @@ namespace TBD.Psi.RosBagStreamReader
         public int MessageCount = 0;
 
         // Tuple of name and assembly type of the fields.
-        public List<(string, string)> TopicFields;
+        public List<(string name, string type)> TopicFields;
 
         // Table of known topic definitions from the text.
         public Dictionary<string, List<(string, string)>> TopicDependencyTable;
@@ -64,7 +64,9 @@ namespace TBD.Psi.RosBagStreamReader
         // topic connection Ids. The first is the id of the bag
         public Dictionary<int, List<int>> ConnectionIds = new Dictionary<int, List<int>>();
 
-        public Dictionary<int, List<long>> ChunkPointerList = new Dictionary<int, List<long>>();
+        // A dictionary that stores the list of chunk position for each bags. 
+        // The key is the index to the bag list.
+        public Dictionary<int , List<long>> ChunkPointerList = new Dictionary<int, List<long>>();
 
         public int readCounter = 0;
         public int bagIndex = 0;

@@ -41,15 +41,12 @@
         public static CoordinateSystem Deserialize(byte[] data, ref int offset)
         {
             // get Point
-            var position_x = Helper.ReadMsgFloat64(data, out offset, offset);
-            var position_y = Helper.ReadMsgFloat64(data, out offset, offset);
-            var position_z = Helper.ReadMsgFloat64(data, out offset, offset);
-            var point = new Point3D(position_x, position_y, position_z);
+            var point = GeometrymsgsPointDeserializer.Deserialize(data, ref offset);
             // quaternion
-            var quaternion_x = Helper.ReadMsgFloat64(data, out offset, offset);
-            var quaternion_y = Helper.ReadMsgFloat64(data, out offset, offset);
-            var quaternion_z = Helper.ReadMsgFloat64(data, out offset, offset);
-            var quaternion_w = Helper.ReadMsgFloat64(data, out offset, offset);
+            var quaternion_x = Helper.ReadRosBaseType<double>(data, out offset, offset);
+            var quaternion_y = Helper.ReadRosBaseType<double>(data, out offset, offset);
+            var quaternion_z = Helper.ReadRosBaseType<double>(data, out offset, offset);
+            var quaternion_w = Helper.ReadRosBaseType<double>(data, out offset, offset);
             var quaternion = new Quaternion(quaternion_w, quaternion_x, quaternion_y, quaternion_z);
 
             return ConvertQuaternionToMatrix(quaternion, point);
