@@ -16,21 +16,21 @@ namespace TBD.Psi.RosBagStreamReader
         private Dictionary<string, TopicInformation> metaInformation = new Dictionary<string, TopicInformation>();
         private List<RosStreamMetaData> streamMetaList = new List<RosStreamMetaData>();
         private Dictionary<string, MsgDeserializer> typeDeserializers = new Dictionary<string, MsgDeserializer>();
-        private Dictionary<string, MsgDeserializer> nameDeserializers = new Dictionary<string, MsgDeserializer>();
+        private List<(string name, MsgDeserializer deserializer)> nameDeserializers = new List<(string, MsgDeserializer)>();
         private readonly object streamLock = new object();
 
         private DateTime bagStartTime;
         private DateTime bagEndTime;
 
-        public RosBagReader(List<string> paths)
+        public RosBagReader(List<(MsgDeserializer, string)> namedDeserializer = null, List<MsgDeserializer> typeDeserializer = null)
         {
+            this.loadDeserializers(namedDeserializer, typeDeserializer);
+        }
 
+        public void Initialize(List<string> paths)
+        {
             this.FirstBagName = System.IO.Path.GetFileName(paths[0]);
             this.BagDirectory = System.IO.Path.GetDirectoryName(paths[0]);
-
-            this.loadDeserializers();
-
-
             // Read bags one by one
             // get information about the topics
             foreach (var path in paths)
@@ -130,17 +130,17 @@ namespace TBD.Psi.RosBagStreamReader
             foreach (var info in metaInformation)
             {
                 // if get if there is a fuzzy match
-                var matches = this.nameDeserializers.Where(entry => info.Key.Contains(entry.Key) && entry.Value.RosMessageTypeName == info.Value.Type);
+                var matches = this.nameDeserializers.Where(e => info.Key.Contains(e.name) && e.deserializer.RosMessageTypeName == info.Value.Type);
                 if (matches.Count() > 0)
                 {
                     // check for perfect matches 
-                    if (matches.Where(m => m.Key == info.Key).Any())
+                    if (matches.Where(m => m.name == info.Key).Any())
                     {
-                        info.Value.deserializer = matches.Where(m => m.Key == info.Key).First().Value;
+                        info.Value.deserializer = matches.Where(m => m.name == info.Key).First().deserializer;
                     }
                     else
                     {
-                        info.Value.deserializer = matches.First().Value;
+                        info.Value.deserializer = matches.First().deserializer;
                     }
                 }
                 // see if there is a registered type of converter for this message type.
@@ -169,11 +169,11 @@ namespace TBD.Psi.RosBagStreamReader
             }
         }
 
-        private void loadDeserializer(MsgDeserializer deserializer, string topicName = "")
+        protected void loadDeserializer(MsgDeserializer deserializer, string topicName = "")
         {
             if (topicName != "")
             {
-                this.nameDeserializers[topicName] = deserializer;
+                this.nameDeserializers.Add((topicName, deserializer));
             }
             else
             {
@@ -181,12 +181,26 @@ namespace TBD.Psi.RosBagStreamReader
             }
         }
 
-        private void loadDeserializers()
+        private void loadDeserializers(List<(MsgDeserializer, string)> namedDeserializer = null, List<MsgDeserializer> typeDeserializer = null)
         {
             // load named deserializers
+            if (namedDeserializer != null)
+            {
+                foreach ((var deserializer, var name) in namedDeserializer)
+                {
+                    this.loadDeserializer(deserializer, name);
+                }
+            }
             this.loadDeserializer(new SensorMsgsImageAsDepthImageDeserializer(true), "depth");
-            this.loadDeserializer(new SensorMsgsCompressedImageAsDepthImageDeserializer(true), "depth");
+            
             // load generic deserializers
+            if (typeDeserializer != null)
+            {
+                foreach (var deserializer in typeDeserializer)
+                {
+                    this.loadDeserializer(deserializer);
+                }
+            }
             this.loadDeserializer(new StdMsgsStringDeserializer());
             this.loadDeserializer(new StdMsgsBoolDeserializer());
             this.loadDeserializer(new StdMsgsColorRGBADeserializer());

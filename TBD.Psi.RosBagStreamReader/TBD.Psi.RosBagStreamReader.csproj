@@ -13,6 +13,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <!--
   <ItemGroup>
     <PackageReference Include="MathNet.Spatial.Signed" Version="0.6.0" />
     <PackageReference Include="Microsoft.Psi.Audio" Version="0.15.49.1-beta" />
@@ -21,8 +22,14 @@
     <PackageReference Include="Microsoft.Psi.Language" Version="0.15.49.1-beta" />
     <PackageReference Include="Microsoft.Psi.Runtime" Version="0.15.49.1-beta" />
   </ItemGroup>
+  -->
 
   <ItemGroup>
+    <ProjectReference Include="..\..\psi\Sources\Audio\Microsoft.Psi.Audio\Microsoft.Psi.Audio.csproj" />
+    <ProjectReference Include="..\..\psi\Sources\Data\Microsoft.Psi.Data\Microsoft.Psi.Data.csproj" />
+    <ProjectReference Include="..\..\psi\Sources\Imaging\Microsoft.Psi.Imaging\Microsoft.Psi.Imaging.csproj" />
+    <ProjectReference Include="..\..\psi\Sources\Language\Microsoft.Psi.Language\Microsoft.Psi.Language.csproj" />
+    <ProjectReference Include="..\..\psi\Sources\Runtime\Microsoft.Psi\Microsoft.Psi.csproj" />
     <ProjectReference Include="..\TBD.Psi.TransformationTree\TBD.Psi.TransformationTree.csproj" />
   </ItemGroup>
 

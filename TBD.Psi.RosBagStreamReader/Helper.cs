@@ -69,7 +69,7 @@ namespace TBD.Psi.RosBagStreamReader
             return ParseHeaderData(headerDataBytes);
         }
 
-        internal static Dictionary<string, byte[]> ParseHeaderData(byte[] headerBytes)
+        public static Dictionary<string, byte[]> ParseHeaderData(byte[] headerBytes)
         {
             var fieldProperties = new Dictionary<string, byte[]>();
 
@@ -115,7 +115,7 @@ namespace TBD.Psi.RosBagStreamReader
             }
         }
 
-        internal static T ReadRosBaseType<T>(byte[] data, out int nextOffset, int offset = 0)
+        public static T ReadRosBaseType<T>(byte[] data, out int nextOffset, int offset = 0)
         {
             switch (Type.GetTypeCode(typeof(T)))
             {
@@ -187,7 +187,7 @@ namespace TBD.Psi.RosBagStreamReader
             }
         }
 
-        internal static T[] ReadRosBaseTypeArray<T>(byte[] data, out int nextOffset, int offset = 0)
+        public static T[] ReadRosBaseTypeArray<T>(byte[] data, out int nextOffset, int offset = 0)
         {
             // get the length of array 
             var length = BitConverter.ToUInt32(data, offset);
@@ -201,7 +201,7 @@ namespace TBD.Psi.RosBagStreamReader
             return arr;
         }
 
-        internal static (uint, DateTime, string) ReadStdMsgsHeader(byte[] data, out int nextOffset, int offset = 0)
+        public static (uint, DateTime, string) ReadStdMsgsHeader(byte[] data, out int nextOffset, int offset = 0)
         {
             var seq = ReadRosBaseType<uint>(data, out nextOffset, offset);
             var originTime = ReadRosBaseType<DateTime>(data, out nextOffset, nextOffset);
@@ -209,7 +209,7 @@ namespace TBD.Psi.RosBagStreamReader
             return (seq, originTime, frameId);
         }
 
-        internal static DateTime FromBytesToDateTime(byte[] timeBytes, int offset = 0)
+        public static DateTime FromBytesToDateTime(byte[] timeBytes, int offset = 0)
         {
             var seconds = BitConverter.ToUInt32(timeBytes, offset);
             var nanoSeconds = BitConverter.ToUInt32(timeBytes, offset + 4);
